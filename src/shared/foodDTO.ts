@@ -1,0 +1,14 @@
+import { z } from 'zod'
+
+export const createFoodSchema = z.object({
+  name: z.string().trim().min(1).max(80),
+  description: z.string().max(80).nullable(),
+  active: z.boolean().default(true),
+})
+
+export const foodSchema = createFoodSchema.extend({
+  id: z.uuid(),
+})
+
+export type CreateFoodDTO = z.infer<typeof createFoodSchema>
+export type FoodDTO = z.infer<typeof foodSchema>

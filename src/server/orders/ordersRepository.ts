@@ -1,0 +1,130 @@
+import type { RowDataPacket, ResultSetHeader } from 'mysql2'
+import type {CreateOrderDTO, OrderStatus, OrderDetailDTO, OrderItemDTO} from '../../shared/ordersDTO'
+import { randomUUID } from 'node:crypto'
+import { pool } from '../database/db'
+
+
+export function toOrdemItemDTO(data: RowDataPacket): OrderItemDTO {
+    return {
+        foodId: data.food_id,
+        quantity: data.quantity
+    }
+
+}
+
+export function toOrderDTO(data: RowDataPacket, items: OrderDetailDTO['items']): OrderDetailDTO{
+    return {
+        id: data.id,
+        room: data.room_id,
+        customer: data.customer,
+        status: data.status,
+        createdAt: data.created_at,
+        items: items
+    }
+}
+
+export async function createOrder(order: CreateOrderDTO): Promise<OrderDetailDTO> {
+    const id = randomUUID()
+    const status: OrderStatus = 'pending'
+    const createdAt = new Date().toISOString()
+    const foodIds = [...new Set(order.items.map(item => item.foodId))]
+
+const [rows] = await pool.query<RowDataPacket[]>(
+    'SELECT id FROM foods WHERE id IN (?) AND active = 1',
+    [foodIds]
+)
+
+if (rows.length !== foodIds.length) {
+    const found = new Set(rows.map(row => row.id))
+    const missing = foodIds.filter(id => !found.has(id))
+    throw new Error(`Alimentos indisponíveis: ${missing.join(', ')}`)
+}
+    const conn = await pool.getConnection()
+    await conn.beginTransaction()
+    await conn.execute<ResultSetHeader>(
+        'INSERT INTO orders (id, room_id, customer, status, created_at) VALUES (?, ?, ?, ?, ?)',
+        [id, order.roomId, order.customer, status, createdAt]
+    )
+    for (const item of order.items){
+    await conn.execute<ResultSetHeader>(
+        'INSERT INTO order_items (id, order_id, food_id, quantity) VALUES (?, ?, ?, ?)',
+        [randomUUID(), id, item.foodId, item.quantity]
+    )
+    }
+    return {
+        id,
+        room: order.roomId,
+        customer: order.customer,
+        status,
+        createdAt,
+        items: order.items
+    }
+}
+
+export async function getOrderById(id: string): Promise<OrderDetailDTO | null> {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+        `SELECT o.id, o.room_id, o.customer, o.status, o.created_at,
+                i.food_id, i.quantity
+         FROM orders o
+         JOIN order_items i ON i.order_id = o.id
+         WHERE o.id = ?`,
+        [id]
+    )
+
+    const first = rows[0]
+    if (!first) return null
+
+    const items = rows.map(row => ({ foodId: row.food_id, quantity: row.quantity }))
+    return toOrderDTO(first, items)
+}
+
+export async function updateStatusOrderById(id: string, status: OrderStatus): Promise<OrderDetailDTO | null> {
+    await pool.execute<ResultSetHeader>(
+        'UPDATE orders SET status = ? WHERE id = ?',
+        [status, id]
+    )
+    return getOrderById(id)
+}
+
+export async function getAllOrders(): Promise<OrderDetailDTO[]> {
+    const [rowsOrders] = await pool.execute<RowDataPacket[]>(
+        'SELECT id, room_id, customer, status, created_at FROM orders ORDER BY created_at DESC'
+    )
+    const [rowsItems] = await pool.execute<RowDataPacket[]>(
+        'SELECT order_id, food_id, quantity FROM order_items'
+    )
+
+    //  agrupa os itens por pedido, uma vez só
+    const itemsByOrder = new Map<string, OrderDetailDTO['items']>()
+    for (const item of rowsItems) {
+        const list = itemsByOrder.get(item.order_id) ?? []
+        list.push({ foodId: item.food_id, quantity: item.quantity })
+        itemsByOrder.set(item.order_id, list)
+    }
+
+    //  monta cada pedido com os itens dele
+    return rowsOrders.map(order => toOrderDTO(order, itemsByOrder.get(order.id) ?? []))
+}
+
+export async function getAllOrdersByStatus(status: OrderStatus): Promise<OrderDetailDTO[]> {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+        `SELECT o.id, o.room_id, o.customer, o.status, o.created_at,
+                i.food_id, i.quantity
+         FROM orders o
+         JOIN order_items i ON i.order_id = o.id
+         WHERE o.status = ?
+         ORDER BY o.created_at, o.id`,
+        [status]
+    )
+
+    const orders = new Map<string, OrderDetailDTO>()
+    for (const row of rows) {
+        let order = orders.get(row.id)
+        if (!order) {
+            order = toOrderDTO(row, [])
+            orders.set(row.id, order)
+        }
+        order.items.push({ foodId: row.food_id, quantity: row.quantity })
+    }
+    return [...orders.values()]
+}
