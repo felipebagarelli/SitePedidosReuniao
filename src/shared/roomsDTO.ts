@@ -5,7 +5,13 @@ export const CreateRoomSchema = z.object({
   active: z.boolean().default(true),
 })
 
+export const UpdateRoomActiveSchema = z.object({
+  id: z.string().uuid(),
+  active: z.boolean(),
+})
+
 export type CreateRoomDTO = z.infer<typeof CreateRoomSchema>
+export type UpdateRoomActiveDTO = z.infer<typeof UpdateRoomActiveSchema>
 
 export interface RoomDTO {
   id: string

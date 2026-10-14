@@ -52,7 +52,7 @@ export async function updateFood(id: string, food: CreateFoodDTO): Promise<FoodD
     return getFoodById(id)
 }
 
-export async function setInactiveFood(id: string): Promise<boolean> {
+export async function setInactiveFoodById(id: string): Promise<boolean> {
     const [result] = await pool.execute<ResultSetHeader>(
         'UPDATE foods SET active = false WHERE id = ?',
         [id]

@@ -1,4 +1,4 @@
-import { CreateRoomDTO, RoomDTO } from "../../shared/roomsDTO";
+import { CreateRoomDTO, RoomDTO, UpdateRoomActiveDTO } from "../../shared/roomsDTO";
 import { randomUUID } from 'node:crypto'
 import { pool } from '../database/db'
 import { ResultSetHeader, RowDataPacket } from "mysql2";
@@ -46,10 +46,10 @@ export async function getRoomById(id: string): Promise<RoomDTO | null> {
     return row ? toRoomDTO(row) : null
 }
 
-export async function updateRoomActiveById(id: string, active: boolean): Promise<RoomDTO | null> {
+export async function updateRoomActiveById(data: UpdateRoomActiveDTO): Promise<RoomDTO | null> {
     await pool.execute<ResultSetHeader>(
         'UPDATE rooms SET active = ? WHERE id = ?',
-        [active, id]
+        [data.id, data.active ]
     )
-    return getRoomById(id)
+    return getRoomById(data.id)
 }

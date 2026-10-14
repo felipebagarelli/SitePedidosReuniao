@@ -1,6 +1,7 @@
 import type { RowDataPacket } from "mysql2";
 import { pool } from "../database/db";
 import { createRoom, getAllRooms, getAllRoomsByActive, getRoomById, updateRoomActiveById } from "./roomsRepository";
+import { CreateRoomSchema } from "../../shared/roomsDTO";
 
 const UNKNOWN_ID = "00000000-0000-0000-0000-000000000000";
 
@@ -78,9 +79,11 @@ describe('getRoomById', () => {
 })
 
 describe('updateRoomActiveById', () => {
-    it('atualiza o campo active da sala', async () => {
-        const created = await createRoom({ name: 'Sala 1', active: true })
-        const updated = await updateRoomActiveById(created.id, false)
-        expect(updated).toEqual({ ...created, active: false })
-    })
+  it('atualiza o campo active da sala', async () => {
+    const created = await createRoom({ name: 'Sala 1', active: true })
+
+    const updated = await updateRoomActiveById({ id: created.id, active: false })
+
+    expect(updated).toEqual({ ...created, active: false })
+  })
 })
