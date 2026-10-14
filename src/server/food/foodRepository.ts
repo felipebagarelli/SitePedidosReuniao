@@ -14,12 +14,11 @@ export function toFoodDTO(data: RowDataPacket): FoodDTO {
 
 export async function createFood(food: CreateFoodDTO): Promise<FoodDTO> {
     const id = randomUUID()
-    const active = true
     await pool.execute<ResultSetHeader>(
         'INSERT INTO foods (id, name, description, active) VALUES (?, ?, ?, ?)',
-        [id, food.name, food.description, active]
+        [id, food.name, food.description, food.active]
     )
-    return { id, ...food }     
+    return { id, ...food }
 }
 
 export async function getFoodById(id: string): Promise<FoodDTO | null> {

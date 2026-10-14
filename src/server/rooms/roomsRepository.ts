@@ -9,18 +9,17 @@ function toRoomDTO(data: RowDataPacket): RoomDTO{
     return {
         id: data.id,
         name: data.name,
-        active: data.active
+        active: Boolean(data.active)
     }
 }
 
 export async function createRoom(data: CreateRoomDTO): Promise<RoomDTO> {
     const id = randomUUID()
-    const active = true
     await pool.execute<ResultSetHeader>(
         'INSERT INTO rooms (id, name, active) VALUES (?, ?, ?)',
-        [id, data.name, active]
+        [id, data.name, data.active]
     )
-    return { id, ...data }
+    return { id, ...data}
 }
 
 export async function getAllRooms(): Promise<RoomDTO[]> {

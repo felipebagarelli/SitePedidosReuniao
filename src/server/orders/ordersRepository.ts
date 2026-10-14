@@ -18,47 +18,48 @@ export function toOrderDTO(data: RowDataPacket, items: OrderDetailDTO['items']):
         room: data.room_id,
         customer: data.customer,
         status: data.status,
-        createdAt: data.created_at,
+        createdAt: new Date(data.created_at).toISOString(),
         items: items
     }
 }
 
 export async function createOrder(order: CreateOrderDTO): Promise<OrderDetailDTO> {
     const id = randomUUID()
-    const status: OrderStatus = 'pending'
-    const createdAt = new Date().toISOString()
     const foodIds = [...new Set(order.items.map(item => item.foodId))]
 
-const [rows] = await pool.query<RowDataPacket[]>(
-    'SELECT id FROM foods WHERE id IN (?) AND active = 1',
-    [foodIds]
-)
+    const [rows] = await pool.query<RowDataPacket[]>(
+        'SELECT id FROM foods WHERE id IN (?) AND active = 1',
+        [foodIds]
+    )
+    if (rows.length !== foodIds.length) {
+        const found = new Set(rows.map(row => row.id))
+        const missing = foodIds.filter(id => !found.has(id))
+        throw new Error(`Alimentos indisponíveis: ${missing.join(', ')}`)
+    }
 
-if (rows.length !== foodIds.length) {
-    const found = new Set(rows.map(row => row.id))
-    const missing = foodIds.filter(id => !found.has(id))
-    throw new Error(`Alimentos indisponíveis: ${missing.join(', ')}`)
-}
     const conn = await pool.getConnection()
-    await conn.beginTransaction()
-    await conn.execute<ResultSetHeader>(
-        'INSERT INTO orders (id, room_id, customer, status, created_at) VALUES (?, ?, ?, ?, ?)',
-        [id, order.roomId, order.customer, status, createdAt]
-    )
-    for (const item of order.items){
-    await conn.execute<ResultSetHeader>(
-        'INSERT INTO order_items (id, order_id, food_id, quantity) VALUES (?, ?, ?, ?)',
-        [randomUUID(), id, item.foodId, item.quantity]
-    )
+    try {
+        await conn.beginTransaction()
+        await conn.execute<ResultSetHeader>(
+            'INSERT INTO orders (id, room_id, customer) VALUES (?, ?, ?)',
+            [id, order.roomId, order.customer]
+        )
+        for (const item of order.items) {
+            await conn.execute<ResultSetHeader>(
+                'INSERT INTO order_items (id, order_id, food_id, quantity) VALUES (?, ?, ?, ?)',
+                [randomUUID(), id, item.foodId, item.quantity]
+            )
+        }
+        await conn.commit()
+    } catch (err) {
+        await conn.rollback()
+        throw err
+    } finally {
+        conn.release()
     }
-    return {
-        id,
-        room: order.roomId,
-        customer: order.customer,
-        status,
-        createdAt,
-        items: order.items
-    }
+
+    const created = await getOrderById(id)
+    return created!
 }
 
 export async function getOrderById(id: string): Promise<OrderDetailDTO | null> {
