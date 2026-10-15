@@ -112,4 +112,49 @@ describe('PATCH /api/rooms/:id/active', () => {
   })
   
 })
-//falta colocar a get/id, put e patch ainda!!!!!
+
+describe('GET /api/rooms/qrcodes', () => {
+  it('devolve o QR de cada sala ativa e ignora as inativas', async () => {
+    const active = await createRoom({ name: 'Ativa', active: true })
+    await createRoom({ name: 'Inativa', active: false })
+
+    const res = await request(app).get('/api/rooms/qrcodes')
+
+    expect(res.status).toBe(200)
+    expect(res.body).toHaveLength(1)
+    expect(res.body[0].room.id).toBe(active.id)
+    expect(res.body[0].url).toContain(`?room=${active.id}`)
+    expect(res.body[0].svg).toContain('<svg')
+  })
+})
+
+describe('GET /api/rooms/:id/qrcode', () => {
+  it('devolve uma imagem PNG', async () => {
+    const room = await createRoom({ name: 'Sala 1', active: true })
+
+    const res = await request(app).get(`/api/rooms/${room.id}/qrcode`)
+
+    expect(res.status).toBe(200)
+    expect(res.headers['content-type']).toContain('image/png')
+  })
+
+  it('responde 404 quando a sala não existe', async () => {
+    const res = await request(app).get(`/api/rooms/${UNKNOWN_ID}/qrcode`)
+
+    expect(res.status).toBe(404)
+  })
+
+  it('responde 400 quando a sala está inativa', async () => {
+    const room = await createRoom({ name: 'Sala 1', active: false })
+
+    const res = await request(app).get(`/api/rooms/${room.id}/qrcode`)
+
+    expect(res.status).toBe(400)
+  })
+
+  it('responde 400 quando o id não é um UUID', async () => {
+    const res = await request(app).get('/api/rooms/abc/qrcode')
+
+    expect(res.status).toBe(400)
+  })
+})

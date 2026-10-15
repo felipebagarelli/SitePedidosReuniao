@@ -2,6 +2,7 @@ import type { Request, Response } from 'express'
 import { z } from 'zod'
 import { CreateRoomSchema, UpdateRoomActiveSchema } from '../../shared/roomsDTO'
 import { createRoom, getAllRooms, getAllRoomsByActive, getRoomById, updateRoomActiveById } from './roomsRepository'
+import { getAllRoomsQr, getRoomQrPng } from './roomsService'
 
 export async function list(req: Request, res: Response) {
   const rooms = req.query.active === 'true' ? await getAllRoomsByActive(true) : await getAllRooms()
@@ -44,4 +45,18 @@ export async function updateActive(req: Request, res: Response) {
   }
 
   res.json(room)
+}
+
+export async function qrCodes(req: Request, res: Response) {
+  res.json(await getAllRoomsQr())
+}
+
+export async function qrCodePng(req: Request, res: Response) {
+  const idParsed = z.uuid().safeParse(req.params.id)
+  if (!idParsed.success) {
+    return res.status(400).json({ error: 'Id inválido' })
+  }
+
+  const png = await getRoomQrPng(idParsed.data)
+  res.type('png').send(png)
 }

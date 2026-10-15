@@ -48,6 +48,7 @@ jobs:
           echo "DB_USER=pedidos_app" >> .env.test
           echo "DB_PASSWORD=test_password" >> .env.test
           echo "DB_NAME=pedidos_test" >> .env.test
+          echo "PUBLIC_URL=http://localhost:3000" >> .env.test
 
       - name: Rodar os testes
         run: npm test
