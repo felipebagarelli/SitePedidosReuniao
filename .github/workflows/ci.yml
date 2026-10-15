@@ -39,7 +39,7 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Criar as tabelas do banco de teste
-        run: mysql -h 127.0.0.1 -u pedidos_app -ptest_password pedidos_test < src/server/database/schema.sql
+        run: mysql -h 127.0.0.1 -u pedidos_app -ptest_password pedidos_test < database/schema.sql
 
       - name: Criar o .env.test
         run: |

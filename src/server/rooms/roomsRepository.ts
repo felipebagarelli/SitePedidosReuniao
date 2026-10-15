@@ -1,6 +1,6 @@
 import { CreateRoomDTO, RoomDTO, UpdateRoomActiveDTO } from "../../shared/roomsDTO";
 import { randomUUID } from 'node:crypto'
-import { pool } from '../database/db'
+import { pool } from '../db/db'
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { map } from "zod";
 

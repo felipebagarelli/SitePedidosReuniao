@@ -1,5 +1,5 @@
 import type { RowDataPacket } from "mysql2";
-import { pool } from "../database/db";
+import { pool } from "../db/db";
 import { createRoom, getAllRooms, getAllRoomsByActive, getRoomById, updateRoomActiveById } from "./roomsRepository";
 import { CreateRoomSchema } from "../../shared/roomsDTO";
 

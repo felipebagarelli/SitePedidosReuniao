@@ -1,4 +1,4 @@
-import {pool} from '../database/db'
+import {pool} from '../db/db'
 import type { RowDataPacket, ResultSetHeader } from 'mysql2'
 import { type CreateFoodDTO, type FoodDTO } from '../../shared/foodDTO' 
 import { randomUUID } from 'node:crypto'

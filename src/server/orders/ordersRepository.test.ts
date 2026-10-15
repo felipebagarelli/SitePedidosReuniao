@@ -1,5 +1,5 @@
 import type { RowDataPacket } from 'mysql2'
-import { pool } from '../database/db'
+import { pool } from '../db/db'
 import { createRoom } from '../rooms/roomsRepository'
 import { createFood } from '../food/foodRepository'
 import { createOrder, getOrderById, updateStatusOrderById, getAllOrders, getAllOrdersByStatus } from './ordersRepository'

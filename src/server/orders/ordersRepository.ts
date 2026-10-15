@@ -1,7 +1,7 @@
 import type { RowDataPacket, ResultSetHeader } from 'mysql2'
 import type {CreateOrderDTO, OrderStatus, OrderDetailDTO, OrderItemDTO} from '../../shared/ordersDTO'
 import { randomUUID } from 'node:crypto'
-import { pool } from '../database/db'
+import { pool } from '../db/db'
 
 
 export function toOrdemItemDTO(data: RowDataPacket): OrderItemDTO {

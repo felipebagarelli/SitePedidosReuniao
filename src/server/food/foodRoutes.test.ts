@@ -1,7 +1,7 @@
   import request from 'supertest'
   import type { RowDataPacket } from 'mysql2'
   import { app } from '../app'
-  import { pool } from '../database/db'
+  import { pool } from '../db/db'
 import { createFood } from './foodRepository'
 
 const UNKNOWN_ID = '00000000-0000-0000-0000-000000000000'
