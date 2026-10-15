@@ -1,5 +1,6 @@
 import express from 'express'
 import { foodRouter } from './food/foodRoutes'
+import { roomsRouter } from './rooms/roomsRoutes'
 
 export const app = express()
 
@@ -11,6 +12,7 @@ app.get('/api/ping', (req, res) => {
 })
 
 app.use('/api/foods', foodRouter)
+app.use('/api/rooms', roomsRouter)
 
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err.stack)

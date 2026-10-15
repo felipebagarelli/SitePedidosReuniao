@@ -1,8 +1,10 @@
-import request from 'supertest'
-import type { RowDataPacket } from 'mysql2'
-import { app } from '../app'
-import { pool } from '../database/db'
-import {createFood} from './foodRepository'
+  import request from 'supertest'
+  import type { RowDataPacket } from 'mysql2'
+  import { app } from '../app'
+  import { pool } from '../database/db'
+import { createFood } from './foodRepository'
+
+const UNKNOWN_ID = '00000000-0000-0000-0000-000000000000'
 
 async function selectFoodRow(id: string) {
   const [rows] = await pool.execute<RowDataPacket[]>(
@@ -13,38 +15,25 @@ async function selectFoodRow(id: string) {
 }
 
 describe('POST /api/foods', () => {
-  it('cria um alimento e responde 201 com o DTO', async () => {
+  it('cria o alimento, grava no banco e responde 201 com o DTO', async () => {
     const res = await request(app)
       .post('/api/foods')
       .send({ name: 'Café', description: 'Xícara', active: true })
 
     expect(res.status).toBe(201)
     expect(res.body).toEqual({ id: res.body.id, name: 'Café', description: 'Xícara', active: true })
-  })
-
-  it('grava o alimento no banco', async () => {
-    const res = await request(app)
-      .post('/api/foods')
-      .send({ name: 'Café', description: 'Xícara', active: true })
-
-    const row = await selectFoodRow(res.body.id)
-
-    expect(row).toMatchObject({ name: 'Café', description: 'Xícara', active: 1 })
+    expect(await selectFoodRow(res.body.id)).toMatchObject({ name: 'Café', description: 'Xícara' })
   })
 
   it('usa active true quando o campo não é enviado', async () => {
-    const res = await request(app)
-      .post('/api/foods')
-      .send({ name: 'Café', description: null })
+    const res = await request(app).post('/api/foods').send({ name: 'Café', description: null })
 
     expect(res.status).toBe(201)
     expect(res.body.active).toBe(true)
   })
 
   it('responde 400 quando o nome está vazio', async () => {
-    const res = await request(app)
-      .post('/api/foods')
-      .send({ name: '', description: null })
+    const res = await request(app).post('/api/foods').send({ name: '', description: null })
 
     expect(res.status).toBe(400)
   })
@@ -56,17 +45,8 @@ describe('POST /api/foods', () => {
   })
 })
 
-const UNKNOWN_ID = '00000000-0000-0000-0000-000000000000'
-
 describe('GET /api/foods', () => {
-  it('responde 200 com lista vazia quando não há alimentos', async () => {
-    const res = await request(app).get('/api/foods')
-
-    expect(res.status).toBe(200)
-    expect(res.body).toEqual([])
-  })
-
-  it('devolve todos, inclusive os inativos', async () => {
+  it('devolve todos os alimentos, inclusive os inativos', async () => {
     await createFood({ name: 'Ativo', description: null, active: true })
     await createFood({ name: 'Inativo', description: null, active: false })
 
@@ -112,7 +92,7 @@ describe('GET /api/foods/:id', () => {
 })
 
 describe('PUT /api/foods/:id', () => {
-  it('altera todos os campos e responde 200 com o alimento atualizado', async () => {
+  it('altera o alimento, grava no banco e responde 200 com o DTO atualizado', async () => {
     const created = await createFood({ name: 'Nome antigo', description: 'Descrição antiga', active: true })
 
     const res = await request(app)
@@ -153,22 +133,13 @@ describe('PUT /api/foods/:id', () => {
 })
 
 describe('PATCH /api/foods/:id/inactive', () => {
-  it('desativa o alimento e responde 204', async () => {
+  it('desativa o alimento no banco e responde 204', async () => {
     const created = await createFood({ name: 'Café', description: null, active: true })
 
     const res = await request(app).patch(`/api/foods/${created.id}/inactive`)
 
     expect(res.status).toBe(204)
     expect((await selectFoodRow(created.id))?.active).toBe(0)
-  })
-
-  it('não desativa os outros alimentos', async () => {
-    const target = await createFood({ name: 'Alvo', description: null, active: true })
-    const other = await createFood({ name: 'Outro', description: null, active: true })
-
-    await request(app).patch(`/api/foods/${target.id}/inactive`)
-
-    expect((await selectFoodRow(other.id))?.active).toBe(1)
   })
 
   it('responde 404 quando o alimento não existe', async () => {

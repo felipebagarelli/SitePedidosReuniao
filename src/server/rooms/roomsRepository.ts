@@ -49,7 +49,7 @@ export async function getRoomById(id: string): Promise<RoomDTO | null> {
 export async function updateRoomActiveById(data: UpdateRoomActiveDTO): Promise<RoomDTO | null> {
     await pool.execute<ResultSetHeader>(
         'UPDATE rooms SET active = ? WHERE id = ?',
-        [data.id, data.active ]
+        [ data.active , data.id]
     )
     return getRoomById(data.id)
 }

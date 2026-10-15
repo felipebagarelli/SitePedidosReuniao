@@ -84,6 +84,6 @@ describe('updateRoomActiveById', () => {
 
     const updated = await updateRoomActiveById({ id: created.id, active: false })
 
-    expect(updated).toEqual({ ...created, active: false })
+    expect(updated).toEqual({ id: created.id, name: created.name, active: false })
   })
 })
