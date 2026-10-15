@@ -1,4 +1,4 @@
-import { pool } from '../src/server/database/db'
+import { pool } from '../src/server/db/db'
 
 // Trava de segurança: os testes apagam tudo, então só rodam em banco de teste.
 beforeAll(() => {
