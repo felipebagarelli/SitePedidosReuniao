@@ -1,7 +1,9 @@
 import type { RowDataPacket, ResultSetHeader } from 'mysql2'
-import type {CreateOrderDTO, OrderStatus, OrderDetailDTO, OrderItemDTO} from '../../shared/ordersDTO'
+import type { CreateOrderDTO, OrderStatus, OrderDetailDTO, OrderItemDTO } from '../../shared/ordersDTO'
 import { randomUUID } from 'node:crypto'
 import { pool } from '../db/db'
+import { BadRequestError } from '../errors'
+import { getRoomById } from '../rooms/roomsRepository'
 
 
 export function toOrdemItemDTO(data: RowDataPacket): OrderItemDTO {
@@ -12,7 +14,7 @@ export function toOrdemItemDTO(data: RowDataPacket): OrderItemDTO {
 
 }
 
-export function toOrderDTO(data: RowDataPacket, items: OrderDetailDTO['items']): OrderDetailDTO{
+export function toOrderDTO(data: RowDataPacket, items: OrderDetailDTO['items']): OrderDetailDTO {
     return {
         id: data.id,
         room: data.room_id,
@@ -25,6 +27,10 @@ export function toOrderDTO(data: RowDataPacket, items: OrderDetailDTO['items']):
 
 export async function createOrder(order: CreateOrderDTO): Promise<OrderDetailDTO> {
     const id = randomUUID()
+    const room = await getRoomById(order.roomId)
+    if (!room || !room.active) {
+        throw new BadRequestError('Sala indisponível')
+    }
     const foodIds = [...new Set(order.items.map(item => item.foodId))]
 
     const [rows] = await pool.query<RowDataPacket[]>(
@@ -34,7 +40,7 @@ export async function createOrder(order: CreateOrderDTO): Promise<OrderDetailDTO
     if (rows.length !== foodIds.length) {
         const found = new Set(rows.map(row => row.id))
         const missing = foodIds.filter(id => !found.has(id))
-        throw new Error(`Alimentos indisponíveis: ${missing.join(', ')}`)
+        throw new BadRequestError(`Alimentos indisponíveis: ${missing.join(', ')}`)
     }
 
     const conn = await pool.getConnection()
@@ -42,7 +48,7 @@ export async function createOrder(order: CreateOrderDTO): Promise<OrderDetailDTO
         await conn.beginTransaction()
         await conn.execute<ResultSetHeader>(
             'INSERT INTO orders (id, room_id, customer) VALUES (?, ?, ?)',
-            [id, order.roomId, order.customer]
+            [id, room.id, order.customer]
         )
         for (const item of order.items) {
             await conn.execute<ResultSetHeader>(

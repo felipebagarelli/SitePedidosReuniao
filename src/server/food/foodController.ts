@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express'
 import { z } from 'zod'
 import { createFoodSchema } from '../../shared/foodDTO'
-import { createFood, getActiveFoods, getAllFoods, getFoodById, updateFood, setInactiveFoodById } from './foodRepository'
+import { createFood, getActiveFoods, getAllFoods, getFoodById, updateFood, setInactiveFoodById, getInactiveFoods } from './foodRepository'
 
 export async function create(req: Request, res: Response) {
   const parsed = createFoodSchema.safeParse(req.body)
@@ -14,7 +14,7 @@ export async function create(req: Request, res: Response) {
 }
 
 export async function list(req: Request, res: Response) {
-  const foods = req.query.active === 'true' ? await getActiveFoods() : await getAllFoods()
+  const foods = req.query.active === 'true' ? await getActiveFoods() : req.query.active === 'false' ? await getInactiveFoods : await getAllFoods()
   res.json(foods)
 }
 

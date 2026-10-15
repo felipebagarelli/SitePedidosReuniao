@@ -43,6 +43,12 @@ export async function getActiveFoods(): Promise<FoodDTO[]> {
     )
     return rows.map(toFoodDTO)
 }
+export async function getInactiveFoods(): Promise<FoodDTO[]> {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+        'SELECT * FROM foods WHERE active = false'
+    )
+    return rows.map(toFoodDTO)
+}
 
 export async function updateFood(id: string, food: CreateFoodDTO): Promise<FoodDTO | null> {
     await pool.execute<ResultSetHeader>(
