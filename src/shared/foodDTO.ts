@@ -4,6 +4,7 @@ export const createFoodSchema = z.object({
   name: z.string().trim().min(1).max(80),
   description: z.string().max(80).nullable(),
   active: z.boolean().default(true),
+  imageUrl: z.string().max(255).nullable(),
 })
 
 export const foodSchema = createFoodSchema.extend({

@@ -12,8 +12,8 @@ let foodId2: string
 
 beforeEach(async () => {
   roomId = (await createRoom({ name: 'Sala 1', active: true })).id
-  foodId = (await createFood({ name: 'Café', description: null, active: true })).id
-  foodId2 = (await createFood({ name: 'Água', description: null, active: true })).id
+  foodId = (await createFood({ name: 'Café', description: null, active: true, imageUrl: 'urlteste'})).id
+  foodId2 = (await createFood({ name: 'Água', description: null, active: true, imageUrl: 'urlteste' })).id
 })
 
 
@@ -105,7 +105,7 @@ describe('createOrder', () => {
   })
 
   it('rejeita alimento inativo e não grava nada', async () => {
-    const inactive = await createFood({ name: 'Esgotado', description: null, active: false })
+    const inactive = await createFood({ name: 'Esgotado', description: null, active: false, imageUrl: 'urlteste' })
 
     await expect(
       createOrder({ roomId, customer: 'Felipe', items: [{ foodId: inactive.id, quantity: 1 }] })

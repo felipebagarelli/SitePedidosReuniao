@@ -15,20 +15,20 @@ async function selectFoodRow(id: string) {
 
 describe('createFood', () => {
     it('grava a linha no banco', async () => {
-        const created = await createFood({name: 'Café', description: 'Xícara', active: true})
+        const created = await createFood({name: 'Café', description: 'Xícara', active: true, imageUrl: 'urlteste'})
         const row =  await selectFoodRow(created.id)
 
         expect(row).toMatchObject({name: 'Café', description: 'Xícara', active: 1})
     })
 
     it('devolve o DTO com active como boolean', async () => {
-        const created = await createFood({name: 'Café', description: 'Xícara', active: true})
-        expect(created).toEqual({id: created.id, name: 'Café', description: 'Xícara', active: true})
+        const created = await createFood({name: 'Café', description: 'Xícara', active: true, imageUrl: 'urlteste'})
+        expect(created).toEqual({id: created.id, name: 'Café', description: 'Xícara', active: true, imageUrl: 'urlteste'})
     })
 
     it('gera ids diferentes para alimentos diferentes', async () =>{
-        const a = await createFood({name: 'a', description: null, active: true})
-        const b = await createFood({name: 'B', description: null, active: true})
+        const a = await createFood({name: 'a', description: null, active: true, imageUrl: 'urlteste'})
+        const b = await createFood({name: 'B', description: null, active: true, imageUrl: 'urlteste'})
 
         expect(a.id).not.toBe(b.id)
     })
@@ -40,8 +40,8 @@ describe('getAllFoods', () => {
   })
 
   it('devolve todos, inclusive os inativos', async () => {
-    await createFood({ name: 'Ativo', description: null, active: true })
-    await createFood({ name: 'Inativo', description: null, active: false })
+    await createFood({ name: 'Ativo', description: null, active: true, imageUrl: 'urlteste' })
+    await createFood({ name: 'Inativo', description: null, active: false, imageUrl: 'urlteste' })
 
     const foods = await getAllFoods()
 
@@ -51,8 +51,8 @@ describe('getAllFoods', () => {
 
 describe('getActiveFoods', () => {
   it('devolve só os alimentos ativos', async () => {
-    await createFood({ name: 'Ativo', description: null, active: true })
-    await createFood({ name: 'Inativo', description: null, active: false })
+    await createFood({ name: 'Ativo', description: null, active: true, imageUrl: 'urlteste' })
+    await createFood({ name: 'Inativo', description: null, active: false, imageUrl: 'urlteste' })
 
     const foods = await getActiveFoods()
 
@@ -63,7 +63,7 @@ describe('getActiveFoods', () => {
 
 describe('getFoodById', () => {
   it('devolve o alimento pelo id', async () => {
-    const created = await createFood({ name: 'Café', description: 'Xícara', active: true })
+    const created = await createFood({ name: 'Café', description: 'Xícara', active: true, imageUrl: 'urlteste' })
 
     const found = await getFoodById(created.id)
 
@@ -71,7 +71,7 @@ describe('getFoodById', () => {
   })
 
   it('converte active 0 do banco para false', async () => {
-    const created = await createFood({ name: 'Café', description: null, active: false })
+    const created = await createFood({ name: 'Café', description: null, active: false, imageUrl: 'urlteste' })
 
     const found = await getFoodById(created.id)
 
@@ -85,25 +85,25 @@ describe('getFoodById', () => {
 
 describe('updateFood', () => {
   it('altera todos os campos e devolve o alimento atualizado', async () => {
-    const created = await createFood({ name: 'Nome antigo', description: 'Descrição antiga', active: true })
+    const created = await createFood({ name: 'Nome antigo', description: 'Descrição antiga', active: true, imageUrl: 'urlteste' })
 
-    const updated = await updateFood(created.id, { name: 'Nome novo', description: 'Descrição nova', active: false })
+    const updated = await updateFood(created.id, { name: 'Nome novo', description: 'Descrição nova', active: false, imageUrl: 'urlteste' })
 
-    expect(updated).toEqual({ id: created.id, name: 'Nome novo', description: 'Descrição nova', active: false })
+    expect(updated).toEqual({ id: created.id, name: 'Nome novo', description: 'Descrição nova', active: false, imageUrl: 'urlteste' })
     expect(await selectFoodRow(created.id)).toMatchObject({ name: 'Nome novo', description: 'Descrição nova', active: 0 })
   })
 
   it('não altera os outros alimentos', async () => {
-    const target = await createFood({ name: 'Alvo', description: 'D1', active: true })
-    const other = await createFood({ name: 'Outro', description: 'D2', active: true })
+    const target = await createFood({ name: 'Alvo', description: 'D1', active: true, imageUrl: 'urlteste' })
+    const other = await createFood({ name: 'Outro', description: 'D2', active: true, imageUrl: 'urlteste' })
 
-    await updateFood(target.id, { name: 'Alvo novo', description: 'D3', active: false })
+    await updateFood(target.id, { name: 'Alvo novo', description: 'D3', active: false, imageUrl: 'urlteste' })
 
     expect(await selectFoodRow(other.id)).toMatchObject({ name: 'Outro', description: 'D2', active: 1 })
   })
 
   it('devolve null quando o id não existe', async () => {
-    const updated = await updateFood(UNKNOWN_ID, { name: 'X', description: null, active: true })
+    const updated = await updateFood(UNKNOWN_ID, { name: 'X', description: null, active: true, imageUrl: 'urlteste' })
 
     expect(updated).toBeNull()
   })
@@ -111,7 +111,7 @@ describe('updateFood', () => {
 
 describe('setInactiveFoodById', () => {
   it('desativa o alimento e devolve true', async () => {
-    const created = await createFood({ name: 'Café', description: null, active: true })
+    const created = await createFood({ name: 'Café', description: null, active: true, imageUrl: 'urlteste' })
 
     const result = await setInactiveFoodById(created.id)
 
@@ -120,15 +120,15 @@ describe('setInactiveFoodById', () => {
   })
 
   it('não desativa os outros alimentos', async () => {
-    const target = await createFood({ name: 'Alvo', description: null, active: true })
-    const other = await createFood({ name: 'Outro', description: null, active: true })
+    const target = await createFood({ name: 'Alvo', description: null, active: true, imageUrl: 'urlteste' })
+    const other = await createFood({ name: 'Outro', description: null, active: true, imageUrl: 'urlteste' })
 
     await setInactiveFoodById(target.id)
 
     expect((await selectFoodRow(other.id))?.active).toBe(1)
   })
 
-  it('devolve false quando o id não existe', async () => {
+  it('devolve false', async () => {
     expect(await setInactiveFoodById(UNKNOWN_ID)).toBe(false)
   })
 })

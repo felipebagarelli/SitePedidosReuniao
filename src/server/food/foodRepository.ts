@@ -9,14 +9,15 @@ export function toFoodDTO(data: RowDataPacket): FoodDTO {
     name: data.name,
     description: data.description,
     active: Boolean(data.active),
+    imageUrl: data.image_url,
   }
 }
 
 export async function createFood(food: CreateFoodDTO): Promise<FoodDTO> {
     const id = randomUUID()
     await pool.execute<ResultSetHeader>(
-        'INSERT INTO foods (id, name, description, active) VALUES (?, ?, ?, ?)',
-        [id, food.name, food.description, food.active]
+        'INSERT INTO foods (id, name, description, active, image_url) VALUES (?, ?, ?, ?, ?)',
+        [id, food.name, food.description, food.active, food.imageUrl]
     )
     return { id, ...food }
 }
@@ -52,8 +53,8 @@ export async function getInactiveFoods(): Promise<FoodDTO[]> {
 
 export async function updateFood(id: string, food: CreateFoodDTO): Promise<FoodDTO | null> {
     await pool.execute<ResultSetHeader>(
-        'UPDATE foods SET name = ?, description = ?, active = ? WHERE id = ?',
-        [food.name, food.description, food.active, id]
+        'UPDATE foods SET name = ?, description = ?, active = ?, image_url = ? WHERE id = ?',
+        [food.name, food.description, food.active, food.imageUrl, id]
     )
     return getFoodById(id)
 }

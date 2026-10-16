@@ -18,15 +18,15 @@ describe('POST /api/foods', () => {
   it('cria o alimento, grava no banco e responde 201 com o DTO', async () => {
     const res = await request(app)
       .post('/api/foods')
-      .send({ name: 'Café', description: 'Xícara', active: true })
+      .send({ name: 'Café', description: 'Xícara', active: true, imageUrl: 'urlteste' })
 
     expect(res.status).toBe(201)
-    expect(res.body).toEqual({ id: res.body.id, name: 'Café', description: 'Xícara', active: true })
+    expect(res.body).toEqual({ id: res.body.id, name: 'Café', description: 'Xícara', active: true, imageUrl: 'urlteste' })
     expect(await selectFoodRow(res.body.id)).toMatchObject({ name: 'Café', description: 'Xícara' })
   })
 
   it('usa active true quando o campo não é enviado', async () => {
-    const res = await request(app).post('/api/foods').send({ name: 'Café', description: null })
+    const res = await request(app).post('/api/foods').send({ name: 'Café', description: null, imageUrl: 'urlteste' })
 
     expect(res.status).toBe(201)
     expect(res.body.active).toBe(true)
@@ -47,8 +47,8 @@ describe('POST /api/foods', () => {
 
 describe('GET /api/foods', () => {
   it('devolve todos os alimentos, inclusive os inativos', async () => {
-    await createFood({ name: 'Ativo', description: null, active: true })
-    await createFood({ name: 'Inativo', description: null, active: false })
+    await createFood({ name: 'Ativo', description: null, active: true, imageUrl: 'urlteste' })
+    await createFood({ name: 'Inativo', description: null, active: false, imageUrl: 'urlteste' })
 
     const res = await request(app).get('/api/foods')
 
@@ -57,8 +57,8 @@ describe('GET /api/foods', () => {
   })
 
   it('com ?active=true devolve só os ativos', async () => {
-    await createFood({ name: 'Ativo', description: null, active: true })
-    await createFood({ name: 'Inativo', description: null, active: false })
+    await createFood({ name: 'Ativo', description: null, active: true, imageUrl: 'urlteste' })
+    await createFood({ name: 'Inativo', description: null, active: false, imageUrl: 'urlteste' })
 
     const res = await request(app).get('/api/foods').query({ active: 'true' })
 
@@ -70,7 +70,7 @@ describe('GET /api/foods', () => {
 
 describe('GET /api/foods/:id', () => {
   it('responde 200 com o alimento', async () => {
-    const created = await createFood({ name: 'Café', description: 'Xícara', active: true })
+    const created = await createFood({ name: 'Café', description: 'Xícara', active: true, imageUrl: 'urlteste' })
 
     const res = await request(app).get(`/api/foods/${created.id}`)
 
@@ -93,31 +93,31 @@ describe('GET /api/foods/:id', () => {
 
 describe('PUT /api/foods/:id', () => {
   it('altera o alimento, grava no banco e responde 200 com o DTO atualizado', async () => {
-    const created = await createFood({ name: 'Nome antigo', description: 'Descrição antiga', active: true })
+    const created = await createFood({ name: 'Nome antigo', description: 'Descrição antiga', active: true, imageUrl: 'urlteste' })
 
     const res = await request(app)
       .put(`/api/foods/${created.id}`)
-      .send({ name: 'Nome novo', description: 'Descrição nova', active: false })
+      .send({ name: 'Nome novo', description: 'Descrição nova', active: false, imageUrl: 'urlteste' })
 
     expect(res.status).toBe(200)
-    expect(res.body).toEqual({ id: created.id, name: 'Nome novo', description: 'Descrição nova', active: false })
+    expect(res.body).toEqual({ id: created.id, name: 'Nome novo', description: 'Descrição nova', active: false, imageUrl: 'urlteste' })
     expect(await selectFoodRow(created.id)).toMatchObject({ name: 'Nome novo', description: 'Descrição nova', active: 0 })
   })
 
   it('responde 404 quando o alimento não existe', async () => {
     const res = await request(app)
       .put(`/api/foods/${UNKNOWN_ID}`)
-      .send({ name: 'X', description: null, active: true })
+      .send({ name: 'X', description: null, active: true, imageUrl: 'urlteste' })
 
     expect(res.status).toBe(404)
   })
 
   it('responde 400 quando o corpo é inválido e não altera o alimento', async () => {
-    const created = await createFood({ name: 'Café', description: null, active: true })
+    const created = await createFood({ name: 'Café', description: null, active: true, imageUrl: 'urlteste' })
 
     const res = await request(app)
       .put(`/api/foods/${created.id}`)
-      .send({ name: '', description: null, active: true })
+      .send({ name: '', description: null, active: true, imageUrl: 'urlteste' })
 
     expect(res.status).toBe(400)
     expect((await selectFoodRow(created.id))?.name).toBe('Café')
@@ -126,7 +126,7 @@ describe('PUT /api/foods/:id', () => {
   it('responde 400 quando o id não é um UUID', async () => {
     const res = await request(app)
       .put('/api/foods/abc')
-      .send({ name: 'X', description: null, active: true })
+      .send({ name: 'X', description: null, active: true, imageUrl: 'urlteste' })
 
     expect(res.status).toBe(400)
   })
@@ -134,7 +134,7 @@ describe('PUT /api/foods/:id', () => {
 
 describe('PATCH /api/foods/:id/inactive', () => {
   it('desativa o alimento no banco e responde 204', async () => {
-    const created = await createFood({ name: 'Café', description: null, active: true })
+    const created = await createFood({ name: 'Café', description: null, active: true, imageUrl: 'urlteste' })
 
     const res = await request(app).patch(`/api/foods/${created.id}/inactive`)
 

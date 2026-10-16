@@ -14,8 +14,8 @@ let foodId2: string
 
 beforeEach(async () => {
   roomId = (await createRoom({ name: 'Sala 1', active: true })).id
-  foodId = (await createFood({ name: 'Café', description: null, active: true })).id
-  foodId2 = (await createFood({ name: 'Água', description: null, active: true })).id
+  foodId = (await createFood({ name: 'Café', description: null, active: true, imageUrl: 'urlteste' })).id
+  foodId2 = (await createFood({ name: 'Água', description: null, active: true, imageUrl: 'urlteste' })).id
 })
 
 async function selectOrderRow(id: string) {

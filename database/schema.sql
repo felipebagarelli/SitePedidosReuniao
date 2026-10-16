@@ -8,7 +8,8 @@ CREATE TABLE foods (
   id          CHAR(36)    NOT NULL PRIMARY KEY,
   name        VARCHAR(80) NOT NULL,
   description VARCHAR(80) NULL,
-  active      TINYINT(1)  NOT NULL DEFAULT 1
+  active      TINYINT(1)  NOT NULL DEFAULT 1,
+  image_url VARCHAR(255) NULL
 );
 
 CREATE TABLE orders (
