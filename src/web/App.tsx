@@ -1,3 +1,4 @@
+import { AdminPage } from './admin/AdminPage'
 import { ClientPage } from './client/ClientPage'
 
 export function App() {
