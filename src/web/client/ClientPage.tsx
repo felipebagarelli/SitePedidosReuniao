@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { FoodDTO } from '../../shared/foodDTO'
 import type { RoomDTO } from '../../shared/roomsDTO'
+import './client.css'
 
 type ClientPageProps = {
     roomId: string
@@ -106,7 +107,7 @@ export function ClientPage(props: ClientPageProps) {
     }
 
     return (
-        <div>
+        <div className="client-page">
             <header>
                 <img src="/images/logo/logo.png" alt="Logo" />
                 <h1>Pedido de reunião</h1>

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { FoodDTO } from "../../shared/foodDTO";
-import { FoodTab } from "./FoodTab";
+import { FoodTab } from "./foodTab/FoodTab";
+import { RoomsTab } from "./roomTab/RoomsTab";
+import './admin.css'
 
 type Tab = 'foods' | 'rooms' | 'qrcodes'
 
@@ -22,9 +24,9 @@ O ENVIO DE IMAGENS NO BACKEND E AQUI TAMBEM
 
 
     return (
-        <div>
+        <div className="admin-page">
             <header>
-                <img src="/images/logo.png" alt="Logo" />
+                <img src="/images/logo/logo.png" alt="Logo" />
                 <h1>Administração</h1>
             </header>
 

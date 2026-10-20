@@ -1,26 +1,37 @@
-import {pool} from '../db/db'
+import { pool } from '../db/db'
 import type { RowDataPacket, ResultSetHeader } from 'mysql2'
-import { type CreateFoodDTO, type FoodDTO } from '../../shared/foodDTO' 
+import { type CreateFoodDTO, type FoodDTO } from '../../shared/foodDTO'
 import { randomUUID } from 'node:crypto'
+import { ConflictError } from '../errors'
 
 export function toFoodDTO(data: RowDataPacket): FoodDTO {
-  return {
-    id: data.id,
-    name: data.name,
-    description: data.description,
-    active: Boolean(data.active),
-    imageUrl: data.image_url,
-  }
+    return {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        active: Boolean(data.active),
+        imageUrl: data.image_url,
+    }
 }
 
 export async function createFood(food: CreateFoodDTO): Promise<FoodDTO> {
     const id = randomUUID()
-    await pool.execute<ResultSetHeader>(
-        'INSERT INTO foods (id, name, description, active, image_url) VALUES (?, ?, ?, ?, ?)',
-        [id, food.name, food.description, food.active, food.imageUrl]
-    )
+    try {
+        await pool.execute<ResultSetHeader>(
+            'INSERT INTO foods (id, name, description, active, image_url) VALUES (?, ?, ?, ?, ?)',
+            [id, food.name, food.description, food.active, food.imageUrl]
+        )
+    } catch (err) {
+        if ((err as { code?: string }).code === 'ER_DUP_ENTRY') {
+            throw new ConflictError('Já existe um alimento com esse nome')
+        }
+        throw err
+    }
+
     return { id, ...food }
+
 }
+
 
 export async function getFoodById(id: string): Promise<FoodDTO | null> {
     const [rows] = await pool.execute<RowDataPacket[]>(

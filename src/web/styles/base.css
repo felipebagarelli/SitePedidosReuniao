@@ -1,0 +1,21 @@
+:root {
+  --brand: #8b1a1a;
+  --brand-disabled: #7c4c4c;
+  --border: #e5e5e5;
+  --text: #222;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: var(--text);
+  background: #fafafa;
+}
+
+img {
+  max-width: 100%;
+}

@@ -1,27 +1,5 @@
-:root {
-  --brand: #8b1a1a;
-  --brand-disabled: #7c4c4c;
-  --border: #e5e5e5;
-  --text: #222;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
-  color: var(--text);
-  background: #fafafa;
-}
-
-img {
-  max-width: 100%;
-}
-
 /* ---------- Topo ---------- */
-header {
+.client-page header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -32,74 +10,31 @@ header {
   font-weight: bold;
 }
 
-header img {
+.client-page header img {
   height: 55px;
 }
 
-header h1 {
+.client-page header h1 {
   margin: 0;
   font-size: 1.1rem;
 }
 
-header p {
+.client-page header p {
   margin: 0;
   font-size: 0.9rem;
 }
 
 @media (max-width: 480px) {
-  header h1 {
+  .client-page header h1 {
     display: none;
   }
 }
 
 /* ---------- Conteúdo ---------- */
-main {
+.client-page main {
   max-width: 600px;
   margin: 0 auto;
   padding-bottom: 150px;
-}
-
-.food-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px 16px;
-}
-
-.food-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-}
-
-.food-image {
-  width: 72px;
-  height: 72px;
-  object-fit: cover;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-
-.food-image-placeholder {
-  background: #ddd;
-}
-
-.food-info {
-  flex: 1;
-}
-
-.food-info h3 {
-  margin: 0 0 4px;
-}
-
-.food-info p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #666;
 }
 
 .food-quantity {
@@ -131,7 +66,7 @@ main {
 }
 
 /* ---------- Rodapé fixo ---------- */
-footer {
+.client-page footer {
   position: fixed;
   bottom: 0;
   left: 0;
@@ -186,7 +121,7 @@ footer {
   cursor: not-allowed;
 }
 
-/* ---------- Telas de estado ---------- */
+/* ---------- Telas de estado (QR inválido, pedido enviado) ---------- */
 .state-screen {
   display: flex;
   flex-direction: column;
@@ -207,9 +142,4 @@ footer {
   color: #fff;
   font-weight: bold;
   cursor: pointer;
-}
-
-.empty-message {
-  text-align: center;
-  color: #666;
 }

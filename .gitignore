@@ -18,4 +18,4 @@ Thumbs.db
 .vscode/
 .idea/
 
-src/web/public/images/logo
+uploads/

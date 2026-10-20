@@ -3,11 +3,15 @@ import { foodRouter } from './food/foodRoutes'
 import { roomsRouter } from './rooms/roomsRoutes'
 import { ordersRouter } from './orders/ordersRoutes'
 import { AppError } from './errors'
-
+import multer from 'multer'
+import { uploadsRouter } from './uploads/uploadRoutes'
 
 
 export const app = express()
 
+
+app.use('/uploads', express.static('uploads'))
+app.use('/api/uploads', uploadsRouter)
 app.use(express.json())
 app.use(express.static('public'))
 
@@ -23,6 +27,11 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({ error: err.message })
   }
+
+
+if (err instanceof multer.MulterError) {
+    return res.status(400).json({ error: 'Arquivo inválido ou maior que 2 MB' })
+}
 
   console.error(err.stack)
   res.status(500).json({ error: 'Internal Server Error' })
