@@ -32,6 +32,21 @@
   background: #fff;
   cursor: pointer;
 }
+.form-update {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.food-card.inactive {
+  opacity: 0.55;
+}
 
 /* ---------- Formulários (adicionar e editar) ---------- */
 .form-add {

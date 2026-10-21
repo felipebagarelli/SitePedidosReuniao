@@ -11,5 +11,12 @@ export const foodSchema = createFoodSchema.extend({
   id: z.uuid(),
 })
 
+export const updateFoodActiveSchema = z.object({
+  id: z.uuid(),
+  active: z.boolean(),
+})
+
+export type UpdateFoodActiveDTO = z.infer<typeof updateFoodActiveSchema>
+
 export type CreateFoodDTO = z.infer<typeof createFoodSchema>
 export type FoodDTO = z.infer<typeof foodSchema>

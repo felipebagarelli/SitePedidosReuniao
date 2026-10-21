@@ -18,6 +18,8 @@ export function ClientPage(props: ClientPageProps) {
     const [sending, setSending] = useState(false)
     const [sent, setSent] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
+    const [notes, setNotes] = useState('')
+    const [showNotes, setShowNotes] = useState(false)
 
     useEffect(() => {
         fetch(`/api/rooms/${props.roomId}`).then(res => {
@@ -62,13 +64,19 @@ export function ClientPage(props: ClientPageProps) {
             const res = await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ roomId: props.roomId, customer: customer.trim(), items }),
+                body: JSON.stringify({
+                    roomId: props.roomId,
+                    customer: customer.trim(),
+                    notes: notes.trim() || undefined,
+                    items,
+                }),
             })
 
             if (!res.ok) {
                 setErrorMessage('Não foi possível enviar o pedido. Tente novamente.')
                 return
             }
+
 
             setSent(true)
         } catch {
@@ -167,6 +175,23 @@ export function ClientPage(props: ClientPageProps) {
                         <p>Selecione um item e informe seu nome.</p>
                     ) : null}
                     {errorMessage && <p className="error-message">{errorMessage}</p>}
+                </div>
+
+                <div className="footer-notes">
+                    <button type="button" className="notes-toggle" onClick={() => setShowNotes(!showNotes)}>
+                        {showNotes ? '− Ocultar observação' : notes ? '✎ Observação adicionada' : '+ Observação'}
+                    </button>
+
+                    {showNotes && (
+                        <textarea
+                            aria-label="Observação"
+                            placeholder="Ex.: sem açúcar, com adoçante, com gelo..."
+                            maxLength={200}
+                            rows={2}
+                            value={notes}
+                            onChange={e => setNotes(e.target.value)}
+                        />
+                    )}
                 </div>
 
                 <div className="footer-actions">

@@ -1,0 +1,60 @@
+/* ---------- Lista de salas ---------- */
+.room-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.room-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.room-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.room-card.inactive {
+  opacity: 0.55;
+}
+
+.room-info {
+  flex: 1;
+}
+
+.room-info h3 {
+  margin: 0;
+}
+
+/* ---------- Formulário de edição, que abre embaixo do card ---------- */
+.room-edit {
+  padding: 12px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  animation: slide-down 0.25s ease-out;
+}
+
+/*---------Botao de download do qr code---------*/
+
+.download-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font-size: 0.9rem;
+  text-decoration: none;
+}

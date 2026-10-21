@@ -49,6 +49,7 @@ jobs:
           echo "DB_PASSWORD=test_password" >> .env.test
           echo "DB_NAME=pedidos_test" >> .env.test
           echo "PUBLIC_URL=http://localhost:3000" >> .env.test
+          echo "ADMIN_AUTH_DISABLED=true" >> .env.test
 
       - name: Rodar os testes
         run: npm test

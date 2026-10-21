@@ -1,6 +1,6 @@
 import { pool } from '../db/db'
 import type { RowDataPacket, ResultSetHeader } from 'mysql2'
-import { type CreateFoodDTO, type FoodDTO } from '../../shared/foodDTO'
+import { UpdateFoodActiveDTO, type CreateFoodDTO, type FoodDTO } from '../../shared/foodDTO'
 import { randomUUID } from 'node:crypto'
 import { ConflictError } from '../errors'
 
@@ -70,10 +70,10 @@ export async function updateFood(id: string, food: CreateFoodDTO): Promise<FoodD
     return getFoodById(id)
 }
 
-export async function setInactiveFoodById(id: string): Promise<boolean> {
-    const [result] = await pool.execute<ResultSetHeader>(
-        'UPDATE foods SET active = false WHERE id = ?',
-        [id]
+export async function updateFoodActiveById(data: UpdateFoodActiveDTO): Promise<FoodDTO | null> {
+    await pool.execute<ResultSetHeader>(
+        'UPDATE foods SET active = ? WHERE id = ?',
+        [data.active, data.id]
     )
-    return result.affectedRows > 0
+    return getFoodById(data.id)
 }

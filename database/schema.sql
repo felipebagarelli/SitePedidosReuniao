@@ -5,19 +5,21 @@ CREATE TABLE rooms (
 );
 
 CREATE TABLE foods (
-  id          CHAR(36)    NOT NULL PRIMARY KEY,
-  name        VARCHAR(80) NOT NULL,
-  description VARCHAR(80) NULL,
-  active      TINYINT(1)  NOT NULL DEFAULT 1,
-  image_url VARCHAR(255) NULL
+  id          CHAR(36)     NOT NULL PRIMARY KEY,
+  name        VARCHAR(80)  NOT NULL,
+  description VARCHAR(80)  NULL,
+  active      TINYINT(1)   NOT NULL DEFAULT 1,
+  image_url   VARCHAR(255) NULL,
+  CONSTRAINT uq_foods_name UNIQUE (name)
 );
 
 CREATE TABLE orders (
-  id         CHAR(36)    NOT NULL PRIMARY KEY,
-  room_id    CHAR(36)    NOT NULL,
-  customer   VARCHAR(40) NOT NULL,
+  id         CHAR(36)     NOT NULL PRIMARY KEY,
+  room_id    CHAR(36)     NOT NULL,
+  customer   VARCHAR(40)  NOT NULL,
+  notes      VARCHAR(200) NULL,
   status     ENUM('pending', 'delivered', 'cancelled') NOT NULL DEFAULT 'pending',
-  created_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_orders_room FOREIGN KEY (room_id) REFERENCES rooms(id),
   INDEX idx_orders_status (status)
 );

@@ -3,8 +3,9 @@ import { FoodDTO } from "../../shared/foodDTO";
 import { FoodTab } from "./foodTab/FoodTab";
 import { RoomsTab } from "./roomTab/RoomsTab";
 import './admin.css'
+import { OrdersTab } from "./ordersTab/OrdersTab";
 
-type Tab = 'foods' | 'rooms' | 'qrcodes'
+type Tab = 'foods' | 'rooms' | 'orders'
 
 export function AdminPage() {
     const [errorMessage, setErrorMessage] = useState('')
@@ -32,14 +33,14 @@ O ENVIO DE IMAGENS NO BACKEND E AQUI TAMBEM
 
             <nav className="tabs">
                 <button className={tab === 'rooms' ? 'active' : ''} onClick={() => setTab('rooms')}>Salas</button>
-                <button className={tab === 'foods' ? 'active' : ''} onClick={() => setTab('foods')}>Alimentos</button>
-                <button className={tab === 'qrcodes' ? 'active' : ''} onClick={() => setTab('qrcodes')}>QR Codes</button>
+                <button className={tab === 'foods' ? 'active' : ''} onClick={() => setTab('foods')}>Cardápio</button>
+                <button className={tab === 'orders' ? 'active' : ''} onClick={() => setTab('orders')}>Pedidos</button>
             </nav>
 
             <main>
                 {tab === 'rooms' && <RoomsTab />}
                 {tab === 'foods' && <FoodTab />}
-                {tab === 'qrcodes' && <QrCodesTab />}
+                {tab === 'orders' && <OrdersTab />}
             </main>
         </div>
     )

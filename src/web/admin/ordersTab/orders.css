@@ -1,0 +1,120 @@
+.orders-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.orders-toolbar select {
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.select-all {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.orders-action {
+  margin-left: auto;
+  min-height: 40px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 8px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.orders-action:disabled {
+  background: var(--brand-disabled);
+  cursor: not-allowed;
+}
+
+.orders-error {
+  color: #b3261e;
+}
+
+.order-room {
+  margin-bottom: 20px;
+}
+
+.order-room h3 {
+  margin: 0 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid var(--brand);
+}
+
+.order-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.order-card.done {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.order-card input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+}
+
+.order-body {
+  flex: 1;
+}
+
+.order-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.order-head span {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.order-body ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.order-notes {
+  margin: 6px 0 0;
+  font-style: italic;
+  color: #555;
+}
+
+.order-status {
+  align-self: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.order-status.delivered {
+  background: #d9f2de;
+  color: #1c6b2c;
+}
+
+.order-status.cancelled {
+  background: #f6d6d6;
+  color: #8b1a1a;
+}

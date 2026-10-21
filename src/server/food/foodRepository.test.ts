@@ -1,6 +1,6 @@
 import type { RowDataPacket } from "mysql2";
 import { pool } from "../db/db";
-import { createFood, getAllFoods, getActiveFoods, getFoodById, setInactiveFoodById, updateFood } from "./foodRepository";
+import { createFood, getAllFoods, getActiveFoods, getFoodById, updateFood } from "./foodRepository";
 
 const UNKNOWN_ID = "00000000-0000-0000-0000-000000000000";
 
@@ -106,30 +106,6 @@ describe('updateFood', () => {
     const updated = await updateFood(UNKNOWN_ID, { name: 'X', description: null, active: true, imageUrl: 'urlteste' })
 
     expect(updated).toBeNull()
-  })
-})
-
-describe('setInactiveFoodById', () => {
-  it('desativa o alimento e devolve true', async () => {
-    const created = await createFood({ name: 'Café', description: null, active: true, imageUrl: 'urlteste' })
-
-    const result = await setInactiveFoodById(created.id)
-
-    expect(result).toBe(true)
-    expect((await selectFoodRow(created.id))?.active).toBe(0)
-  })
-
-  it('não desativa os outros alimentos', async () => {
-    const target = await createFood({ name: 'Alvo', description: null, active: true, imageUrl: 'urlteste' })
-    const other = await createFood({ name: 'Outro', description: null, active: true, imageUrl: 'urlteste' })
-
-    await setInactiveFoodById(target.id)
-
-    expect((await selectFoodRow(other.id))?.active).toBe(1)
-  })
-
-  it('devolve false', async () => {
-    expect(await setInactiveFoodById(UNKNOWN_ID)).toBe(false)
   })
 })
 

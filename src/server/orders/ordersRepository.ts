@@ -1,5 +1,5 @@
 import type { RowDataPacket, ResultSetHeader } from 'mysql2'
-import type { CreateOrderDTO, OrderStatus, OrderDetailDTO, OrderItemDTO } from '../../shared/ordersDTO'
+import type { CreateOrderDTO, OrderStatus, OrderDetailDTO, OrderItemDTO, UpdateOrdersStatusDTO } from '../../shared/ordersDTO'
 import { randomUUID } from 'node:crypto'
 import { pool } from '../db/db'
 import { BadRequestError } from '../errors'
@@ -21,7 +21,8 @@ export function toOrderDTO(data: RowDataPacket, items: OrderDetailDTO['items']):
         customer: data.customer,
         status: data.status,
         createdAt: new Date(data.created_at).toISOString(),
-        items: items
+        items: items,
+        notes: data.notes
     }
 }
 
@@ -47,8 +48,8 @@ export async function createOrder(order: CreateOrderDTO): Promise<OrderDetailDTO
     try {
         await conn.beginTransaction()
         await conn.execute<ResultSetHeader>(
-            'INSERT INTO orders (id, room_id, customer) VALUES (?, ?, ?)',
-            [id, room.id, order.customer]
+            'INSERT INTO orders (id, room_id, customer, notes) VALUES (?, ?, ?, ?)',
+            [id, room.id, order.customer, order.notes ?? null]
         )
         for (const item of order.items) {
             await conn.execute<ResultSetHeader>(
@@ -70,7 +71,7 @@ export async function createOrder(order: CreateOrderDTO): Promise<OrderDetailDTO
 
 export async function getOrderById(id: string): Promise<OrderDetailDTO | null> {
     const [rows] = await pool.execute<RowDataPacket[]>(
-        `SELECT o.id, o.room_id, o.customer, o.status, o.created_at,
+        `SELECT o.id, o.room_id, o.customer, o.status, o.created_at, o.notes,
                 i.food_id, i.quantity
          FROM orders o
          JOIN order_items i ON i.order_id = o.id
@@ -95,7 +96,7 @@ export async function updateStatusOrderById(id: string, status: OrderStatus): Pr
 
 export async function getAllOrders(): Promise<OrderDetailDTO[]> {
     const [rowsOrders] = await pool.execute<RowDataPacket[]>(
-        'SELECT id, room_id, customer, status, created_at FROM orders ORDER BY created_at DESC'
+        'SELECT id, room_id, customer, status, created_at, notes FROM orders ORDER BY created_at DESC'
     )
     const [rowsItems] = await pool.execute<RowDataPacket[]>(
         'SELECT order_id, food_id, quantity FROM order_items'
@@ -115,7 +116,7 @@ export async function getAllOrders(): Promise<OrderDetailDTO[]> {
 
 export async function getAllOrdersByStatus(status: OrderStatus): Promise<OrderDetailDTO[]> {
     const [rows] = await pool.execute<RowDataPacket[]>(
-        `SELECT o.id, o.room_id, o.customer, o.status, o.created_at,
+        `SELECT o.id, o.room_id, o.customer, o.status, o.created_at, o.notes,
                 i.food_id, i.quantity
          FROM orders o
          JOIN order_items i ON i.order_id = o.id
@@ -134,4 +135,15 @@ export async function getAllOrdersByStatus(status: OrderStatus): Promise<OrderDe
         order.items.push({ foodId: row.food_id, quantity: row.quantity })
     }
     return [...orders.values()]
+}
+
+export async function updateOrdersStatus(data: UpdateOrdersStatusDTO): Promise<number> {
+    const ids = [...new Set(data.ids)]
+
+    const [result] = await pool.query<ResultSetHeader>(
+        "UPDATE orders SET status = ? WHERE id IN (?) AND status = 'pending'",
+        [data.status, ids]
+    )
+
+    return result.affectedRows
 }

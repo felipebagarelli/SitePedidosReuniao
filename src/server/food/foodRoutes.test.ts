@@ -132,25 +132,3 @@ describe('PUT /api/foods/:id', () => {
   })
 })
 
-describe('PATCH /api/foods/:id/inactive', () => {
-  it('desativa o alimento no banco e responde 204', async () => {
-    const created = await createFood({ name: 'Café', description: null, active: true, imageUrl: 'urlteste' })
-
-    const res = await request(app).patch(`/api/foods/${created.id}/inactive`)
-
-    expect(res.status).toBe(204)
-    expect((await selectFoodRow(created.id))?.active).toBe(0)
-  })
-
-  it('responde 404 quando o alimento não existe', async () => {
-    const res = await request(app).patch(`/api/foods/${UNKNOWN_ID}/inactive`)
-
-    expect(res.status).toBe(404)
-  })
-
-  it('responde 400 quando o id não é um UUID', async () => {
-    const res = await request(app).patch('/api/foods/abc/inactive')
-
-    expect(res.status).toBe(400)
-  })
-})

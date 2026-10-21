@@ -1,11 +1,12 @@
 import { Router } from 'express'
 import * as controller from './roomsController'
+import { requireAdmin } from '../auth/adminAuth'
 
 export const roomsRouter = Router()
 
-roomsRouter.get('/', controller.list)
-roomsRouter.get('/qrcodes', controller.qrCodes)
+roomsRouter.get('/', requireAdmin, controller.list)
+roomsRouter.get('/qrcodes', requireAdmin, controller.qrCodes)
 roomsRouter.get('/:id', controller.getById)
-roomsRouter.get('/:id/qrcode', controller.qrCodePng)
-roomsRouter.post('/', controller.create)
-roomsRouter.patch('/:id/active', controller.updateActive)
+roomsRouter.get('/:id/qrcode', requireAdmin, controller.qrCodePng)
+roomsRouter.post('/', requireAdmin, controller.create)
+roomsRouter.patch('/:id/active', requireAdmin, controller.updateActive)

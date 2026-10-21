@@ -13,7 +13,8 @@ export function FoodTab() {
     const [errorMessage, setErrorMessage] = useState('')
     const [showAddForm, setShowAddForm] = useState(false)
     const [showUpdateForm, setShowUpdateForm] = useState(false)
-    const [status, setStatus] = useState<Status>('all')
+    //const [status, setStatus] = useState<>()
+    const [listStatus, setListStatus] = useState<Status>('all')
     const [editingId, setEditingId] = useState<string | null>(null)
 
 
@@ -28,10 +29,26 @@ export function FoodTab() {
     }, [])
 
     const visibleFoods = foods.filter(food => {
-        if (status === 'active') return food.active
-        if (status === 'inactive') return !food.active
+        if (listStatus === 'active') return food.active
+        if (listStatus === 'inactive') return !food.active
         return true
     })
+
+    //função do switch inativo e ativo na tela admin
+    async function toggleActive(food: FoodDTO) {
+        const res = await fetch(`/api/foods/${food.id}/active`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ active: !food.active }),
+        })
+
+        if (!res.ok) {
+            alert('Não foi possível alterar o status do alimento.')
+            return
+        }
+
+        await loadFoods()
+    }
 
 
 
@@ -43,14 +60,14 @@ export function FoodTab() {
                 <div className="food-list">
 
                     <div>
-                        <h2>Alimentos</h2>
+                        <h2>Cardápio</h2>
                         <button type="button" onClick={() => setShowAddForm(true)}>Adicionar</button>
 
                         {showAddForm && (<AddFoodForm onSaved={() => { loadFoods(), setShowAddForm(false) }} onCancel={() => setShowAddForm(false)} />)}
 
                     </div>
 
-                    <select value={status} onChange={e => setStatus(e.target.value as Status)}>
+                    <select value={listStatus} onChange={e => setListStatus(e.target.value as Status)}>
                         <option value="all">Todos</option>
                         <option value="active">Ativos</option>
                         <option value="inactive">Inativos</option>
@@ -58,7 +75,7 @@ export function FoodTab() {
 
                     {visibleFoods.map(food => (
                         <div key={food.id} className="food-item">
-                            <div className="food-card">
+                            <div className={`food-card ${food.active ? '' : 'inactive'}`}>
                                 {food.imageUrl ? (
                                     <img src={food.imageUrl} alt={food.name} className="food-image" />
                                 ) : (
@@ -69,16 +86,24 @@ export function FoodTab() {
                                     <h3>{food.name}</h3>
                                     <p>{food.description}</p>
                                 </div>
-
                                 <div className="form-update">
-                                    <button
-                                        type="button"
-                                        onClick={() => setEditingId(editingId === food.id ? null : food.id)}
-                                    >
+                                    <label className="switch" title={food.active ? 'Desativar' : 'Ativar'}>
+                                        <input
+                                            type="checkbox"
+                                            checked={food.active}
+                                            onChange={() => toggleActive(food)}
+                                        />
+                                        <span className="slider" />
+                                    </label>
+
+                                    <button type="button" onClick={() => setEditingId(editingId === food.id ? null : food.id)}>
                                         {editingId === food.id ? 'Fechar' : 'Editar'}
                                     </button>
                                 </div>
+
+
                             </div>
+
 
                             {editingId === food.id && (
                                 <div className="food-edit">
@@ -91,6 +116,7 @@ export function FoodTab() {
                                         onCancel={() => setEditingId(null)}
                                     />
                                 </div>
+
                             )}
                         </div>
                     ))}

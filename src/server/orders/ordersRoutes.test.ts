@@ -212,3 +212,69 @@ describe('PATCH /api/orders/:id/status', () => {
     expect(res.status).toBe(400)
   })
 })
+
+describe('PATCH /api/orders/status', () => {
+  it('conclui vários pedidos pendentes de uma vez', async () => {
+    const a = await createOrder({ roomId, customer: 'A', items: [{ foodId, quantity: 1 }] })
+    const b = await createOrder({ roomId, customer: 'B', items: [{ foodId, quantity: 1 }] })
+
+    const res = await request(app)
+      .patch('/api/orders/status')
+      .send({ ids: [a.id, b.id], status: 'delivered' })
+
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual({ requested: 2, updated: 2 })
+    expect((await selectOrderRow(a.id))?.status).toBe('delivered')
+    expect((await selectOrderRow(b.id))?.status).toBe('delivered')
+  })
+
+  it('não altera pedidos que não estão pendentes', async () => {
+    const done = await createOrder({ roomId, customer: 'A', items: [{ foodId, quantity: 1 }] })
+    await setStatus(done.id, 'cancelled')
+
+    const res = await request(app)
+      .patch('/api/orders/status')
+      .send({ ids: [done.id], status: 'delivered' })
+
+    expect(res.body).toEqual({ requested: 1, updated: 0 })
+    expect((await selectOrderRow(done.id))?.status).toBe('cancelled')
+  })
+
+  it('não altera pedidos fora da lista', async () => {
+    const target = await createOrder({ roomId, customer: 'Alvo', items: [{ foodId, quantity: 1 }] })
+    const other = await createOrder({ roomId, customer: 'Outro', items: [{ foodId, quantity: 1 }] })
+
+    await request(app).patch('/api/orders/status').send({ ids: [target.id], status: 'delivered' })
+
+    expect((await selectOrderRow(other.id))?.status).toBe('pending')
+  })
+
+  it('responde 200 com updated 0 quando os ids não existem', async () => {
+    const res = await request(app)
+      .patch('/api/orders/status')
+      .send({ ids: [UNKNOWN_ID], status: 'delivered' })
+
+    expect(res.status).toBe(200)
+    expect(res.body.updated).toBe(0)
+  })
+
+  it('responde 400 com lista vazia', async () => {
+    const res = await request(app).patch('/api/orders/status').send({ ids: [], status: 'delivered' })
+
+    expect(res.status).toBe(400)
+  })
+
+  it('responde 400 quando um id não é UUID', async () => {
+    const res = await request(app).patch('/api/orders/status').send({ ids: ['abc'], status: 'delivered' })
+
+    expect(res.status).toBe(400)
+  })
+
+  it('responde 400 para um status não permitido', async () => {
+    const res = await request(app)
+      .patch('/api/orders/status')
+      .send({ ids: [UNKNOWN_ID], status: 'pending' })
+
+    expect(res.status).toBe(400)
+  })
+})

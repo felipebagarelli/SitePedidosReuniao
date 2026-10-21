@@ -143,3 +143,30 @@
   font-weight: bold;
   cursor: pointer;
 }
+
+/*-----------------Notes no footer---------------*/
+.footer-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.notes-toggle {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #ffb3b3;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.footer-notes textarea {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 16px;
+  resize: none;
+}

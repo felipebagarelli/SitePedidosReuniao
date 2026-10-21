@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express'
 import { z } from 'zod'
-import { createFoodSchema } from '../../shared/foodDTO'
-import { createFood, getActiveFoods, getAllFoods, getFoodById, updateFood, setInactiveFoodById, getInactiveFoods } from './foodRepository'
+import { createFoodSchema, updateFoodActiveSchema } from '../../shared/foodDTO'
+import { createFood, getActiveFoods, getAllFoods, getFoodById, updateFood, getInactiveFoods, updateFoodActiveById } from './foodRepository'
 
 export async function create(req: Request, res: Response) {
   const parsed = createFoodSchema.safeParse(req.body)
@@ -46,16 +46,18 @@ export async function update(req: Request, res: Response) {
     res.json(food)
 }
 
-export async function setInactive(req: Request, res: Response) {
-    const idParsed  = z.uuid().safeParse(req.params.id)
-    if (!idParsed.success) {
-    return res.status(400).json({ error: 'Id inválido' })
+export async function updateActive(req: Request, res: Response) {
+    const parsed = updateFoodActiveSchema.safeParse({ ...req.body, id: req.params.id })
+    if (!parsed.success) {
+        return res.status(400).json({ error: 'Dados inválidos', details: parsed.error.issues })
     }
-    const success = await setInactiveFoodById(idParsed.data)
-    if (!success) {
-    return res.status(404).json({ error: 'Alimento não encontrado' })
+
+    const food = await updateFoodActiveById(parsed.data)
+    if (!food) {
+        return res.status(404).json({ error: 'Alimento não encontrado' })
     }
-    res.sendStatus(204)
+
+    res.json(food)
 }
 
 
