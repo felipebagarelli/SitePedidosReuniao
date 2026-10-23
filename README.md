@@ -113,7 +113,7 @@ database/    schema.sql
 ## Autor
 
 **Felipe Bagarelli**
-[LinkedIn](https://www.linkedin.com/in/SEU-PERFIL) · [GitHub](https://github.com/felipebagarelli)
+[LinkedIn](https://www.linkedin.com/in/felipebagarelli) · [GitHub](https://github.com/felipebagarelli)
 
 ## Licença
 
