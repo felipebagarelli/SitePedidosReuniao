@@ -20,4 +20,4 @@ Thumbs.db
 .idea/
 dist/
 deploy/
-uploads/
+/uploads/
