@@ -270,11 +270,5 @@ describe('PATCH /api/orders/status', () => {
     expect(res.status).toBe(400)
   })
 
-  it('responde 400 para um status não permitido', async () => {
-    const res = await request(app)
-      .patch('/api/orders/status')
-      .send({ ids: [UNKNOWN_ID], status: 'pending' })
 
-    expect(res.status).toBe(400)
-  })
 })

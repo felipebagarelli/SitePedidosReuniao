@@ -1,0 +1,120 @@
+# Sistema de Pedidos de Copa
+
+![CI](https://github.com/felipebagarelli/SitePedidosReuniao/actions/workflows/ci.yml/badge.svg)
+
+Sistema web para pedir **bebidas e lanches nas salas de reunião** por **QR Code**, com aviso automático no WhatsApp da copa e um painel de administração.
+
+Desenvolvido para a **NKN Sociedade de Advogados**.
+
+<!-- Adicione aqui capturas de tela: tela do cliente (celular) e painel de pedidos. -->
+
+## O problema
+
+Nas reuniões com clientes, a copa preparava um prato de pão de queijo e bebidas para cada participante, e muitos não queriam. Perguntar a cada um, no meio da reunião, era inconveniente.
+
+## A solução
+
+Cada sala tem um **QR Code fixo**. O participante lê o código com o celular, informa o nome, escolhe o que deseja (e deixa uma observação, como "sem açúcar") e envia. O pedido chega **direto no grupo de WhatsApp da copa**, já identificado pela sala, e também aparece no painel de administração. Sem login para o cliente e sem cobrança.
+
+## Funcionalidades
+
+**Cliente (mobile-first)**
+- Entrada pelo QR Code da sala (`/?room=<id>`), com validação da sala
+- Cardápio com fotos, descrição e controle de quantidade
+- Campo de observação e resumo fixo do pedido
+- Confirmação do envio e tratamento de erros (QR inválido, falha de rede)
+
+**Administração (protegida por senha)**
+- **Pedidos:** agrupados por sala, filtro por status, seleção em lote para marcar como concluído, atualização automática
+- **Cardápio:** cadastro e edição de alimentos, upload de foto, ativar e desativar com um clique
+- **Salas:** cadastro, ativar e desativar, **download do QR Code** de cada sala
+
+**Integrações**
+- Aviso de cada novo pedido em um grupo de WhatsApp (Z-API). Uma falha no envio **nunca impede o pedido**.
+
+## Tecnologias
+
+| Camada | Tecnologias |
+|---|---|
+| Front-end | React 19, TypeScript, Vite |
+| Back-end | Node.js, Express 5, TypeScript |
+| Banco de dados | MySQL (`mysql2`, consultas parametrizadas, transações) |
+| Validação | Zod (esquemas compartilhados entre front e back) |
+| Outros | Multer (upload), qrcode (geração dos QR Codes) |
+| Testes | Jest, Supertest (testes de integração com banco real) |
+| CI | GitHub Actions (com MySQL como serviço) |
+
+## Destaques técnicos
+
+- **Arquitetura em camadas:** rota → controller → service → repository, com tratamento centralizado de erros (classes de erro com código HTTP).
+- **Integridade dos dados:** pedido e itens gravados em **transação**; índice único no nome dos alimentos; alimentos e salas são **desativados, nunca apagados**, preservando o histórico.
+- **Segurança:** autenticação básica com comparação em tempo constante, validação de toda entrada, SQL parametrizado, upload restrito por tipo e tamanho com nome gerado no servidor, e nenhum segredo no repositório (tudo em variáveis de ambiente).
+- **Testes:** mais de 90 testes automatizados (repositories e rotas) rodando em um banco de teste separado, com trava que impede executá-los em um banco que não seja de teste.
+- **Resiliência:** o envio ao WhatsApp é isolado do fluxo principal, com tempo limite e registro de falhas.
+
+## Como rodar localmente
+
+**Requisitos:** Node.js 20 ou superior e MySQL.
+
+```bash
+# 1. Dependências
+npm install
+
+# 2. Banco de dados: crie um banco e importe o esquema
+mysql -u root -p -e "CREATE DATABASE pedidos CHARACTER SET utf8mb4"
+mysql -u root -p pedidos < database/schema.sql
+
+# 3. Configuração
+cp .env.example .env     # preencha os valores
+
+# 4. Servidor (porta 3000) e front-end (porta 5173), em dois terminais
+npm run dev
+npm run dev:web
+```
+
+Abra `http://localhost:5173/?room=<id de uma sala>`. Para criar as primeiras salas e alimentos, use o painel em `http://localhost:5173/admin` (em desenvolvimento, `ADMIN_AUTH_DISABLED=true` no `.env` dispensa a senha).
+
+### Variáveis de ambiente
+
+| Variável | Descrição |
+|---|---|
+| `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | Conexão com o MySQL |
+| `PUBLIC_URL` | Endereço público do sistema (vai dentro dos QR Codes) |
+| `ADMIN_USER`, `ADMIN_PASSWORD` | Credenciais do painel de administração |
+| `ADMIN_AUTH_DISABLED` | Somente desenvolvimento: libera o painel sem senha |
+| `ZAPI_*` | Credenciais da Z-API (opcional: sem elas, o aviso é ignorado) |
+
+### Testes
+
+```bash
+npm test
+```
+
+Os testes usam um banco separado (o nome precisa terminar em `_test`) configurado em `.env.test`.
+
+## Estrutura
+
+```
+src/
+  server/    API: auth, food, rooms, orders, uploads, whatsapp
+  shared/    esquemas e tipos compartilhados (Zod)
+  web/       front-end: client/ (cliente) e admin/ (painel)
+tests/       configuração dos testes
+database/    schema.sql
+```
+
+## API (resumo)
+
+| Rota | Acesso |
+|---|---|
+| `GET /api/rooms/:id`, `GET /api/foods?active=true`, `POST /api/orders` | público (usadas pelo cliente) |
+| Demais rotas de `/api/foods`, `/api/rooms`, `/api/orders` e `POST /api/uploads` | administração (senha) |
+
+## Autor
+
+**Felipe Bagarelli**
+[LinkedIn](https://www.linkedin.com/in/SEU-PERFIL) · [GitHub](https://github.com/felipebagarelli)
+
+## Licença
+
+Todos os direitos reservados. O código está disponível para consulta como portfólio.

@@ -85,6 +85,7 @@ describe('createOrder', () => {
       status: 'pending',
       createdAt: expect.any(String),
       items: [{ foodId, quantity: 2 }],
+      notes: null,
     })
   })
 
