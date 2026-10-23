@@ -6,8 +6,7 @@ export function App() {
   const roomId = new URLSearchParams(window.location.search).get('room')
 
   if (path.startsWith('/admin')) return <AdminPage />
-  if (path.startsWith('/kitchen')) return <KitchenPage />
   if (roomId) return <ClientPage roomId={roomId} />
 
-  return <HomePage />
+  return <AdminPage />
 }
