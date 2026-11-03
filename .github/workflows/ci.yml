@@ -8,48 +8,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: pedidos_test
-          MYSQL_USER: pedidos_app
-          MYSQL_PASSWORD: test_password
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
-
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
+      - name: Type check
+        run: docker compose run --rm test npx tsc --noEmit
 
-      - run: npm ci
+      - name: Run tests
+        run: docker compose run --rm test
 
-      - name: Verificar tipos
-        run: npx tsc --noEmit
-
-      - name: Criar as tabelas do banco de teste
-        run: mysql -h 127.0.0.1 -u pedidos_app -ptest_password pedidos_test < database/schema.sql
-
-      - name: Criar o .env.test
-        run: |
-          echo "PORT=3001" >> .env.test
-          echo "DB_HOST=127.0.0.1" >> .env.test
-          echo "DB_USER=pedidos_app" >> .env.test
-          echo "DB_PASSWORD=test_password" >> .env.test
-          echo "DB_NAME=pedidos_test" >> .env.test
-          echo "PUBLIC_URL=http://localhost:3000" >> .env.test
-          echo "ADMIN_AUTH_DISABLED=true" >> .env.test
-
-      - name: Rodar os testes
-        run: npm test
+      - name: Build production image
+        run: docker build --target runtime -t pedidos:ci .

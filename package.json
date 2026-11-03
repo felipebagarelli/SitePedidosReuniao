@@ -9,9 +9,10 @@
     "build": "npm run build:web && npm run build:server",
     "start": "node dist/server/server.cjs",
     "build:web": "vite build",
-    "build:server": "esbuild src/server/index.ts --bundle --platform=node --target=node18 --format=cjs --outfile=dist/server/server.cjs",
+    "build:server": "esbuild src/server/index.ts --bundle --platform=node --target=node24 --format=cjs --outfile=dist/server/server.cjs",
     "pack": "npm run build:web && npm run build:server && node scripts/pack.mjs",
-    "test": "node --env-file=.env.test node_modules/jest/bin/jest.js --runInBand"
+    "test": "node --env-file=.env.test node_modules/jest/bin/jest.js --runInBand",
+    "test:ci": "jest --runInBand"
   },
   "engines": {
     "node": ">=22"

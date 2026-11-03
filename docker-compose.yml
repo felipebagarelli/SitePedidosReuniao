@@ -1,0 +1,54 @@
+services:
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root_dev
+      MYSQL_DATABASE: pedidos
+      MYSQL_USER: pedidos_app
+      MYSQL_PASSWORD: dev_password
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/db-init.sh:/docker-entrypoint-initdb.d/db-init.sh:ro
+      - ./database/schema.sql:/schema/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_USER: pedidos_app
+      DB_PASSWORD: dev_password
+      DB_NAME: pedidos
+      PUBLIC_URL: http://localhost:3000
+      ADMIN_USER: admin
+      ADMIN_PASSWORD: admin_dev
+    depends_on:
+      db:
+        condition: service_healthy
+
+  test:
+    build:
+      context: .
+      target: test
+    profiles: ["test"]
+    environment:
+      DB_HOST: db
+      DB_USER: pedidos_app
+      DB_PASSWORD: dev_password
+      DB_NAME: pedidos_test
+      PUBLIC_URL: http://localhost:3000
+      ADMIN_AUTH_DISABLED: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
